@@ -1,0 +1,152 @@
+--What is the customer name, country, age and city for
+--only customers that live in the state of California and
+--are over 25 years for the consumer segment Sort the
+--result by age in asc order
+
+--validate the data 
+select *
+from customer
+
+select 
+	customer_name,
+	segment,
+	age,
+	city
+from customer
+where state = 'California'
+and age >25
+and segment in ('Consumer')
+order by age
+
+--Display the total count of customers by segment
+select 
+	count(customer_id),
+	segment
+from customer
+group by 2
+
+--Write a query to categorize profit that are below 100 as Low Margin, within the range of 100 - 300 as Mid Margin 
+--then every other profit that don’t fall in either of but categories as High 
+select 
+	profit,
+case
+	when profit < 100 then 'Low Margin'
+	when profit between 100 and 300 then 'Mid Margin'
+	else 'High Margin'
+end as profit_category
+from sales
+
+--Write a query to categorize second class ship_mode as 2 days shipment, first class ship_mode as 1 day air, 
+--display the count of customer_id for all orders shipped out in september and october 2017. 
+--Display the result for only the top 20 rows.
+select 
+	ship_mode,
+case
+	when ship_mode = 'Second Class' then '2_days_shipment'
+	when ship_mode = 'First Class' then '1_day_air'
+	else 'Other'
+end as shipment_category,
+count (customer_id)
+from sales
+where ship_date between '2017-09-01' and '2017-10-31'
+group by 1
+limit 20
+
+--What is the total number of orders that were not shipped with first class and standard class. 
+--Sort the result by the ship mode
+select 
+	count(order_id),
+	ship_mode
+from sales
+where ship_mode not in ('First Class', 'Standard Class')
+group by 2
+
+--Write a query to show the ship mode, ship_date, total sales, profits and order quantity for all orders that were shipped 
+--the earliest.
+select 
+	ship_mode,
+	min(ship_date) as earliest,
+	sum(sales),
+	profit,
+	quantity
+from sales
+group by 1,4,5
+
+select 
+	ship_mode,
+	ship_date,
+	sum(sales),
+	profit,
+	quantity
+from sales
+group by 1,2,4,5
+order by ship_date asc
+
+--Write a query that returns all the orders that are above 1000 in sales, 
+--from only first class ship mode and are shipped between may and june 2015
+select 
+	order_id,
+	sales,
+	ship_mode
+from sales
+where sales >1000
+and ship_mode = 'First Class'
+and ship_date between '2015-05-01' and '2015-06-30'
+
+select *
+from product
+
+--Write a query for the top 10 orders by fetching customer name, age, state, total sales, total profit, 
+--product category and sub category for only orders placed in 2016 in all states excluding Florida & Utah
+select 
+	c.customer_name,
+	c.age,
+	c.state,
+	sum(s.sales),
+	sum(s.profit),
+	p.category,
+	p.sub_category
+from customer as c
+inner join sales as s
+on c.customer_id = s.customer_id
+inner join product as p
+on p.product_id = s.product_id
+where order_date between '2016-01-01' and '2016-12-31'
+and state not in ('Florida', 'Utah')
+group by 1,2,3,6,7
+
+
+--Write a query to pull customer_id, age, city, sales, profits, ship mode and ship date of transactions purchased in 2017, 
+--for all states excluding California, New York and texas, city does not include null and customer’s age group of 20-60. 
+--sort the result in descending order.
+select 
+	c.customer_id,
+	c.age,
+	c.city,
+	s.sales,
+	s.profit,
+	s.ship_mode,
+	s.ship_date
+from customer as c
+inner join sales as s
+on c.customer_id = s.customer_id
+where order_date between '2017-01-01' and '2017-12-31'
+and state not in ('Califonia', 'New york', 'Texas')
+and city is not null
+and age between 20 and 60
+order by sales desc
+
+--Write a query to show the average age of customers, include their region and city and total number of orders quantities 
+--for orders purchased in 2017 for all customers excluding customers in texas. Sort by region .
+select 
+	avg(c.age),
+	c.region,
+	c.city,
+	sum(s.quantity)
+from customer as c
+inner join sales as s
+on c.customer_id = s.customer_id
+where order_date between '2017-01-01' and '2017-12-31'
+and state not in ('Texas')
+group by 2,3
+order by region
